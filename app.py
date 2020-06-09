@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 install_as_MySQLdb()
 CORS(app, supports_credentials=True)
-SECRET = "52Clover"
+SECRET = "52.Clover"
 
 config = {
     'host': '127.0.0.1',
@@ -38,11 +38,14 @@ def execute_sql(sql):
     try:
         cursor.execute(sql)
         db.commit()
-    except:
+        id = cursor.lastrowid
+    except pymysql.err.InternalError as error:
+        print(error)
         db.rollback()
     finally:
         cursor.close()
     db.close()
+    return id
 
 
 def sign(data):
@@ -50,22 +53,25 @@ def sign(data):
     :param data:
     :return:
     """
-    # 如果请求时间超过当前时间60秒或晚于当前时间60秒，
-    # 则认为请求异常，判定为抓取请求，验签不通过！
-    timestamp = data.get('timestamp')
-    now = time.time()
-    if math.fabs(now - timestamp) > 60:
-        return False
-
     # 提取请求参数里的签名，对请求进行相同方式排序。
     signature = data.pop('sign', None)
     data.setdefault('secret', SECRET)
     keys = sorted(data.keys())
     source = ''.join([key+str(data[key]) for key in keys])
 
+    # secret字段不存入数据库
+    data.pop('secret')
+
+    # 如果请求时间超过当前时间60秒或晚于当前时间60秒，
+    # 则认为请求异常，判定为抓取请求，验签不通过！
+    timestamp = data.pop('timestamp')
+    now = time.time()
+    if math.fabs(now - timestamp) > 60:
+        return False
+
     # 使用md5进行签名计算，如果指纹相同则认为验签通过。
     md5 = hashlib.md5()
-    md5.update(source)
+    md5.update(source.encode('utf-8'))
     fingerprnt = md5.hexdigest()
     return fingerprnt == signature
 
@@ -83,11 +89,11 @@ def api_v1_book_create():
         values = "'" + "','".join(list(map(str, data.values()))) + "'"
         sql = "insert into book.book({0}) values({1})".format(keys, values)
         print(sql)
-        execute_sql(sql)
+        id = execute_sql(sql)
         return jsonify({
             'status': 0,
             'message': 'ok',
-            'data': {}
+            'data': { 'id': id }
         })
     else:
         return jsonify({

@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "5f2dfc02-2bce-4c4b-8af6-bced88d77068",
+		"name": "target",
+		"description": "clvoer凭他测试接口",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "book-create",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "17bea088-4d79-4f4c-aa0b-3f0950ad9ac4",
+						"exec": [
+							"var author = \"陆凌牛\"",
+							"var isbn = 9787111336242",
+							"var name = \"html5与css3权威指南\"",
+							"var price = 69.00",
+							"var publisher = \"机械工业出版社\"",
+							"var secret = \"52.Clover\"",
+							"var timestamp = Math.floor(Date.now() / 1000)",
+							"",
+							"",
+							"var source = \"author\"+author+\"isbn\"+isbn+\"name\"+name+\"price\"+price+\"publisher\"+publisher+\"secret\"+secret+\"timestamp\"+timestamp",
+							"",
+							"var signature = CryptoJS.MD5(source).toString();",
+							"",
+							"postman.setGlobalVariable(\"author\", author)",
+							"postman.setGlobalVariable(\"isbn\", isbn)",
+							"postman.setGlobalVariable(\"name\", name)",
+							"postman.setGlobalVariable(\"price\", price)",
+							"postman.setGlobalVariable(\"publisher\", publisher)",
+							"postman.setGlobalVariable(\"timestamp\", timestamp)",
+							"postman.setGlobalVariable(\"signature\", signature)",
+							"",
+							"console.log(author)",
+							"console.log(isbn)",
+							"console.log(name)",
+							"console.log(price)",
+							"console.log(publisher)",
+							"console.log(timestamp)",
+							"console.log(signature)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{name}}\",\n\t\"author\": \"{{author}}\",\n\t\"price\": {{price}},\n\t\"publisher\": \"{{publisher}}\",\n\t\"isbn\": \"{{isbn}}\",\n\t\"timestamp\": {{timestamp}},\n\t\"sign\": \"{{signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/v1/book/create",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"book",
+						"create"
+					]
+				},
+				"description": "创建一本书"
+			},
+			"response": []
+		}
+	]
+}
